@@ -36,6 +36,18 @@ export const RangeInput = () => {
     setRightThumb(thumbRightRef.current.getBoundingClientRect());
   }, []);
 
+  const updateOnResize = () => {
+    setTrack(trackRef.current.getBoundingClientRect());
+    setLeftThumb(thumbLeftRef.current.getBoundingClientRect());
+    setRightThumb(thumbRightRef.current.getBoundingClientRect());
+    console.log('resizing');
+  };
+
+  React.useLayoutEffect(() => {
+    window.addEventListener('resize', updateOnResize);
+    return () => window.removeEventListener('resize', updateOnResize);
+  }, []);
+
   const moveThumb = (e) => {
     if (isEntered && isClickedRight) {
       setMousePosRight(e.clientX);
