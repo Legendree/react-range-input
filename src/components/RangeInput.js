@@ -22,10 +22,13 @@ export const RangeInput = () => {
 
   const [track, setTrack] = React.useState({ width: 0, height: 0, x: 0, y: 0 });
 
-  const [mousePos, setMousePos] = React.useState(0);
+  const [mousePosLeft, setMousePosLeft] = React.useState(0);
+  const [mousePostRight, setMousePosRight] = React.useState(0);
 
   const [isClickedRight, setIsClickedRight] = React.useState(false);
-  const [isEnteredRight, setIsEnteredRight] = React.useState(false);
+  const [isClickedLeft, setIsClickedLeft] = React.useState(false);
+
+  const [isEntered, setisEntered] = React.useState(false);
 
   React.useEffect(() => {
     setTrack(trackRef.current.getBoundingClientRect());
@@ -34,35 +37,37 @@ export const RangeInput = () => {
   }, []);
 
   const moveThumb = (e) => {
-    if (mousePos >= track.x + track.width) {
-      setMousePos(track.x + track.width - 1);
-    } else {
-      if (isEnteredRight && isClickedRight) {
-        setMousePos(e.clientX);
-      }
+    if (isEntered && isClickedRight) {
+      setMousePosRight(e.clientX);
+    } else if (isEntered && isClickedLeft) {
+      setMousePosLeft(e.clientX);
     }
   };
 
-  const thumbPosition = (thumb) => {
+  const thumbRightPosition = (thumb) => {
     return (
       track.width +
-      (mousePos || track.width + track.x) -
+      (mousePostRight || track.width + track.x) -
       track.width -
       track.x -
       thumb.width / 2
     );
   };
 
-  //return track.width - (track.width + track.x - mousePos + thumb.width / 2);
-  //(mousePos - track.width - track.x - 22 / 2)
+  const thumbLeftPosition = (thumb) => {
+    return (mousePosLeft || track.x) - track.x - thumb.width / 2;
+  };
 
   return (
     <div
-      style={{ cursor: `${isClickedRight ? 'pointer' : 'regular'}` }}
-      onMouseEnter={() => setIsEnteredRight(true)}
+      style={{
+        cursor: `${isClickedRight || isClickedLeft ? 'pointer' : 'initial'}`,
+      }}
+      onMouseEnter={() => setisEntered(true)}
       onMouseLeave={() => {
-        setIsEnteredRight(false);
+        setisEntered(false);
         setIsClickedRight(false);
+        setIsClickedLeft(false);
       }}
       onMouseMove={moveThumb}
       className='range_input_container'
@@ -70,15 +75,20 @@ export const RangeInput = () => {
       <div ref={trackRef} className='range_input_track' />
       <div
         ref={thumbLeftRef}
+        onMouseDown={() => setIsClickedLeft(true)}
+        onMouseUp={() => setIsClickedLeft(false)}
         className='range_input_thumb'
-        style={{ left: 0 }}
+        style={{ left: thumbLeftPosition(leftThumb) }}
       />
       <div
         ref={thumbRightRef}
-        onMouseDown={() => setIsClickedRight(true)}
+        onMouseDown={() => {
+          setIsClickedRight(true);
+          console.log('Clicked right');
+        }}
         onMouseUp={() => setIsClickedRight(false)}
         className='range_input_thumb'
-        style={{ left: thumbPosition(rightThumb) }}
+        style={{ left: thumbRightPosition(rightThumb) }}
       />
     </div>
   );
@@ -92,7 +102,7 @@ export const RangeInput = () => {
     if (thumbPosition(rightThumb) + rightThumb.width >= track.width + 1) {
       setMousePos(track.width + track.x);
     } else {
-      if (isEnteredRight && isClickedRight) {
+      if (isEntered && isClickedRight) {
         setMousePos(e.clientX);
       }
     }
