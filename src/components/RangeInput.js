@@ -34,13 +34,16 @@ export const RangeInput = () => {
   }, []);
 
   const moveThumb = (e) => {
-    if (isEnteredRight && isClickedRight) {
-      setMousePos(e.clientX);
+    if (mousePos >= track.x + track.width) {
+      setMousePos(track.x + track.width - 1);
+    } else {
+      if (isEnteredRight && isClickedRight) {
+        setMousePos(e.clientX);
+      }
     }
   };
 
   const thumbPosition = (thumb) => {
-    console.log(mousePos - track.width - track.x);
     return (
       track.width +
       (mousePos || track.width + track.x) -
@@ -55,6 +58,7 @@ export const RangeInput = () => {
 
   return (
     <div
+      style={{ cursor: `${isClickedRight ? 'pointer' : 'regular'}` }}
       onMouseEnter={() => setIsEnteredRight(true)}
       onMouseLeave={() => {
         setIsEnteredRight(false);
